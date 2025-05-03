@@ -19,6 +19,7 @@ class game_state():
         valid_moves = []
 
         if material == "wp":
+
             if self.board[r-1][c] == "--":
                 valid_moves.append((r-1,c))
             if r == 6 and self.board[r-2][c] == "--":
@@ -30,21 +31,24 @@ class game_state():
             if c < 7:
                 if self.board[r-1][c+1] in ["bp","bB","bN","bR","bQ","bK"]:
                     valid_moves.append((r-1,c+1))
-            if r == 7 :
-                self.board[r][c] = "wR"
+
+        
+                
 
         if material == "bp":
+
             if self.board[r+1][c] == "--":
-                valid_moves.append((r+1,c))
+                valid_moves.append((r+1, c))
             if r == 1 and self.board[r+2][c] == "--":
                 if self.board[r+1][c] == "--":
-                    valid_moves.append((r+2,c))
-            if c > 0 :
-                if self.board[r+1][c+1] in ["wp","wB","wN","wR","wQ","wK"]:
-                    valid_moves.append((r+1,c+1)) 
+                    valid_moves.append((r+2, c))
+            if c > 0:
+                if self.board[r+1][c-1] in ["wp", "wB", "wN", "wR", "wQ", "wK"]:
+                    valid_moves.append((r+1, c-1))
             if c < 7:
-                if self.board[r+1][c-1] in ["wp","wB","wN","wR","wQ","wK"]:
-                    valid_moves.append((r+1,c-1))
+                if self.board[r+1][c+1] in ["wp", "wB", "wN", "wR", "wQ", "wK"]:
+                    valid_moves.append((r+1, c+1))
+                    
 
         if material == "wR":
             for i in range(r-1,-1,-1):
@@ -356,27 +360,38 @@ class game_state():
         valid_moves = self.valid_moves(move.startrow, move.startcol)
         if (move.endrow, move.endcol) in valid_moves:
             self.board[move.startrow][move.startcol] = "--"
-            self.board[move.endrow][move.endcol] = move.materialmoved
+            self.board[move.endrow][move.endcol] = move.piece_moved
             self.moveLog.append(move)
             self.whiteToMove = not self.whiteToMove
             print(move.getchessnotation())
+            self.whiteToMove = False
         else:
             print("geçersiz hamle")
 
+        if move.ispawnpromotion:
+            promote_to = input("Promote to (Q, R, B, N): ").upper()
+            self.board[move.endrow][move.endcol] = move.piece_moved[0] + promote_to
+
+        
+
 
 class move():
-    rankstorows = {"1" : 7,"2" : 6,"3" : 5,"4" : 4,"5" : 3,"6" : 2,"7" : 1,"8" : 0}
+    rankstorows = {"1" : 7, "2" : 6, "3" : 5, "4" : 4, "5" : 3, "6" : 2, "7" : 1, "8" : 0}
     rowstoranks = {v: k for k, v in rankstorows.items()}
-    filestocols = {"a" : 0,"b" : 1,"c" : 2,"d" : 3,"e" : 4,"f" : 5,"g" : 6,"h" : 7}
+    filestocols = {"a" : 0, "b" : 1, "c" : 2, "d" : 3, "e" : 4, "f" : 5, "g" : 6, "h" : 7}
     colstofiles = {v: k for k, v in filestocols.items()}
     
-    def __init__(self,startsq,endsq,board):
+    def __init__(self, startsq, endsq, board):
         self.startrow = startsq[0]
         self.startcol = startsq[1]
         self.endrow = endsq[0]
         self.endcol = endsq[1]
-        self.materialmoved = board[self.startrow][self.startcol]
-        self.materialcaptured = board[self.endrow][self.endcol]
+        self.piece_moved = board[self.startrow][self.startcol]
+        self.piece_captured = board[self.endrow][self.endcol]
+        self.ispawnpromotion = False
+        if (self.piece_moved == "wp" and self.endrow == 0) or (self.piece_moved == "bp" and self.endrow == 7):
+            self.ispawnpromotion = True  
+        self.isenpassant = False
     
     
 
